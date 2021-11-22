@@ -1,0 +1,3 @@
+-> Mise en place de Factory :
+    - Au début, lorsque l'on passe la conf
+    - au moment de la callback
