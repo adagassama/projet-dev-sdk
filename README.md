@@ -1,3 +1,5 @@
 # projet-dev-sdk
-Bienvenue dans notre projet SDK
-Test
+
+# Tous les commits doivent être signés pour ce projet:
+
+Adama - Florian
