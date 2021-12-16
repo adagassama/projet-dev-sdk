@@ -49,6 +49,18 @@ function getFacebookToken($params)
     return json_decode($result, true)["access_token"];
 }
 
+function getGithubToken($params)
+{
+    $params = array_merge([
+        "client_id" => "14fbe1077e4ebd627fd8",
+        "client_secret" => "9f4a58eaa926e304eac4b0b757118910dec255ed",
+        "redirect_uri" => "https://localhost:443/redirect_github",
+    ], $params);
+    $result = file_get_contents("https://github.com/login/oauth/access_token" . "?" . http_build_query($params));
+    return json_decode($result, true)["access_token"];
+}
+
+
 function getFacebookUser($token)
 {
     $context = stream_context_create([
@@ -77,6 +89,21 @@ function getGoogleUser($token)
     $result = file_get_contents("https://www.googleapis.com/oauth2/v2", false, $context);
     return json_decode($result, true);
 }
+
+function getGithubUser($token)
+{
+    $context = stream_context_create([
+        'http'=>[
+            "header" => [
+                "Authorization: Bearer " . $token
+            ]
+        ]
+    ]);
+
+    $result = file_get_contents("https://api.github.com/user", false, $context);
+    return json_decode($result, true);
+}
+//https://github.com/login/oauth/access_token
 
 function getAuthUrl($baseUrl, $params)
 {
@@ -108,11 +135,16 @@ function login()
         $urlGoogle = getAuthUrl("https://accounts.google.com/o/oauth2/v2/auth", [
             "redirect_uri" => "https://localhost/redirect_google",
             "client_id" => "260549229334-afm2rl1bn9lfcbktk3ekm99r89kj8tqg.apps.googleusercontent.com",
-            "scope" => "email"/*[
-                            "https://www.googleapis.com/auth/userinfo.email",
-                            "https://www.googleapis.com/auth/userinfo.profile"]*/,
+            "scope" => "email",
         ]);
-        echo "<a href='{$urlGoogle}'>Se connecter via Google</a></br></br>";
+        echo "<a href='{$urlGoogle}'>Se connecter via Google</a></br>";
+
+        $urlGithub = getAuthUrl("https://github.com/login/oauth/authorize", [
+            "redirect_uri" => "https://localhost/redirect_github",
+            "client_id" => "14fbe1077e4ebd627fd8",
+            "scope" => "user",
+        ]);
+        echo "<a href='{$urlGithub}'>Se connecter via Github</a></br></br>";
 
         echo "<form method='POST'>";
         echo "<input name='username'/>";
@@ -170,6 +202,20 @@ function handleGoogle()
     echo json_encode($user);
 }
 
+function handleGithub()
+{
+    ["code" => $code, "state" => $state] = $_GET;
+    if ($state !== STATE) {
+        throw new \Exception("Erreur d'authentification");
+    }
+    $token = getGithubToken([
+        "grant_type" => "authorization_code",
+        "code" => $code,
+    ]);
+    $user = getGithubUser($token);
+    echo json_encode($user);
+}
+
 
 $route = strtok($_SERVER["REQUEST_URI"], "?");
 
@@ -187,6 +233,9 @@ try {
          case '/redirect_google':
              handleGoogle();
              break;
+         case '/redirect_github':
+                handleGoogle();
+                break;
         default:
             throw new \RuntimeException();
         break;
