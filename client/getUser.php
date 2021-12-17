@@ -1,6 +1,5 @@
 <?php
 
-
 class GetUser
 {
 
@@ -38,7 +37,7 @@ class GetUser
         return json_decode($result, true)["access_token"];
     }
 
-    function handleSuccess($client_id, $client_secret, $redirect_uri, $uri_access_token, $user_endpoint)
+    public function handleSuccess($client_id, $client_secret, $redirect_uri, $uri_access_token, $user_endpoint)
     {
         $this->client_id = $client_id;
         $this->client_secret = $client_secret;
