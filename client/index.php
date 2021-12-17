@@ -2,6 +2,8 @@
 
 define("STATE", "fdsfvedfvedz");
 
+require ("./client/getUser.php");
+
 function getUser($token)
 {
     $context = stream_context_create([
@@ -225,7 +227,10 @@ try {
             login();
             break;
         case '/redirect_success':
-            handleSuccess();
+            
+            handleSuccess(
+                $client_id
+            );
             break;
         case '/redirect_facebook':
             handleFacebook();
@@ -234,8 +239,8 @@ try {
              handleGoogle();
              break;
          case '/redirect_github':
-                handleGoogle();
-                break;
+            handleGoogle();
+            break;
         default:
             throw new \RuntimeException();
         break;
